@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sintaksis Hunter T2 Phase 2 World 8</title>
+<style>html,body{margin:0;width:100%;height:100%;background:#07111f}iframe{border:0;width:100%;height:100%;display:block}</style>
+<script src="phase2-world8.js"></script>
+</head>
+<body>
+<iframe id="phase2" src="v12.html" title="Sintaksis Hunter Phase 2 World 1 hingga 8"></iframe>
+<script>
+const outer=document.getElementById('phase2');
+function findGame(frame){
+ try{
+  let win=frame.contentWindow,doc=frame.contentDocument;
+  for(let depth=0;depth<16;depth++){
+   if(win&&typeof win.buildQuestions==='function')return win;
+   const next=doc&&doc.querySelector('iframe');
+   if(!next)return null;
+   win=next.contentWindow;doc=next.contentDocument;
+  }
+ }catch(e){}
+ return null;
+}
+function installWorld8(){
+ const game=findGame(outer);
+ if(!game)return false;
+ if(game.__phase2World8Installed)return true;
+ const previousBuild=game.buildQuestions;
+ game.buildQuestions=function(world){
+  if(world===7)return window.PHASE2_WORLD8.map(q=>({...q,a:[...q.a],keywords:[...(q.keywords||[])]}));
+  return previousBuild(world);
+ };
+ game.__phase2World8Installed=true;
+ return true;
+}
+outer.addEventListener('load',()=>{
+ let tries=0;
+ const timer=setInterval(()=>{
+  tries++;
+  if(installWorld8()||tries>160)clearInterval(timer);
+ },150);
+});
+</script>
+</body>
+</html>
