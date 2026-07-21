@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sintaksis Hunter T2</title>
+  <style>
+    :root{--bg:#07111f;--panel:#101d31;--line:#28405f;--text:#f5f7fb;--muted:#9fb0c7;--accent:#7c5cff;--good:#28c76f;--bad:#ff5f6d;--gold:#ffcc4d}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top,#132745,#07111f 58%);color:var(--text);min-height:100vh}
+    button,input{font:inherit}.wrap{max-width:1080px;margin:auto;padding:24px}.card{background:rgba(16,29,49,.95);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+    h1,h2,h3{margin:0 0 12px}.muted{color:var(--muted)}.hidden{display:none!important}.grid{display:grid;gap:18px}.two{grid-template-columns:1.35fr .65fr}.stats{grid-template-columns:repeat(4,1fr)}
+    .stat{background:#0b1728;border:1px solid var(--line);border-radius:16px;padding:14px}.value{font-size:1.45rem;font-weight:800}.label{color:var(--muted);font-size:.88rem}
+    input{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:#081426;color:var(--text);margin-top:6px}.field{margin:14px 0}
+    .btn{border:0;border-radius:14px;padding:13px 16px;background:var(--accent);color:white;font-weight:800;cursor:pointer}.btn.secondary{background:#1c2f49}.btn.good{background:var(--good)}.btn.bad{background:var(--bad)}
+    .answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.answer{padding:14px;text-align:left;border:1px solid var(--line);border-radius:14px;background:#0c1930;color:var(--text);cursor:pointer}.answer:hover{border-color:var(--accent)}
+    .bar{height:14px;background:#07101d;border-radius:99px;overflow:hidden;border:1px solid var(--line)}.fill{height:100%;background:linear-gradient(90deg,var(--accent),#bcaeff);width:100%;transition:.35s}.hp{background:linear-gradient(90deg,#ff5f6d,#ff9c6e)}
+    .monster{height:180px;display:grid;place-items:center;font-size:82px;background:linear-gradient(145deg,#182944,#0a1425);border-radius:20px;border:1px solid var(--line);margin:12px 0}.feedback{margin-top:16px;padding:16px;border-radius:14px;background:#0b1728;border:1px solid var(--line)}
+    table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size:.92rem}.rank-self{background:rgba(124,92,255,.16)}
+    .tag{display:inline-block;padding:5px 10px;border-radius:99px;background:#1b2c46;color:#c8d6eb;font-size:.8rem}.top{display:flex;justify-content:space-between;gap:12px;align-items:center}.progress-note{font-size:.9rem;color:var(--muted)}
+    .wrong-item{border:1px solid var(--line);border-radius:16px;padding:15px;margin:12px 0;background:#0a1729}.correct{color:var(--good);font-weight:800}.incorrect{color:var(--bad);font-weight:800}
+    @media(max-width:780px){.two,.stats{grid-template-columns:1fr 1fr}.answers{grid-template-columns:1fr}.wrap{padding:14px}.monster{height:130px;font-size:62px}}
+    @media(max-width:500px){.two,.stats{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section id="login" class="card" style="max-width:560px;margin:40px auto">
+    <span class="tag">KSSM Tingkatan 2</span>
+    <h1 style="margin-top:10px">Sintaksis Hunter</h1>
+    <p class="muted">Masukkan identiti pemain. Skor, kesalahan dan pembetulan akan direkodkan.</p>
+    <div class="field"><label>Nama murid<input id="name" maxlength="30" placeholder="Contoh: Aiman"></label></div>
+    <div class="field"><label>Kelas<input id="className" maxlength="20" placeholder="Contoh: 2 Amanah"></label></div>
+    <div class="field"><label>Kod permainan<input id="room" maxlength="12" value="T2-SINTAKSIS"></label></div>
+    <button id="start" class="btn" type="button">Mula Memburu</button>
+  </section>
+
+  <main id="game" class="hidden">
+    <div class="top" style="margin-bottom:18px">
+      <div><span class="tag">WORLD 1 • POLA AYAT LANJUTAN</span><h1 id="welcome">Sintaksis Hunter</h1></div>
+      <button id="openReview" class="btn secondary" type="button">Pusat Pembetulan</button>
+    </div>
+
+    <section class="grid stats" style="margin-bottom:18px">
+      <div class="stat"><div class="label">Skor</div><div id="score" class="value">0</div></div>
+      <div class="stat"><div class="label">Combo</div><div id="combo" class="value">x0</div></div>
+      <div class="stat"><div class="label">Ketepatan</div><div id="accuracy" class="value">0%</div></div>
+      <div class="stat"><div class="label">Kedudukan</div><div id="rank" class="value">-</div></div>
+    </section>
+
+    <section class="grid two">
+      <div class="card">
+        <div class="top"><div><h2 id="qNo">Soalan 1/10</h2><div id="category" class="progress-note"></div></div><span id="difficulty" class="tag">Sukar</span></div>
+        <div style="margin:14px 0"><div class="label">HP Musuh</div><div class="bar"><div id="enemyHp" class="fill hp"></div></div></div>
+        <div class="monster" aria-label="Monster sintaksis">👾</div>
+        <h3 id="question"></h3>
+        <p id="instruction" class="muted"></p>
+        <div id="answers" class="answers"></div>
+        <div id="feedback" class="feedback hidden" aria-live="polite"></div>
+        <button id="next" class="btn hidden" type="button" style="margin-top:14px">Soalan Seterusnya</button>
+      </div>
+
+      <aside class="card">
+        <h2>Papan Kedudukan</h2>
+        <p class="muted">Top pemain dalam bilik yang sama.</p>
+        <table><thead><tr><th>#</th><th>Nama</th><th>Skor</th></tr></thead><tbody id="board"></tbody></table>
+        <p class="progress-note" style="margin-top:12px">V0.1 menggunakan data demo setempat. Sambungan Supabase akan mengaktifkan skor masa nyata antara peranti.</p>
+      </aside>
+    </section>
+  </main>
+
+  <section id="review" class="card hidden">
+    <div class="top"><div><span class="tag">PUSAT PEMBETULAN</span><h1>Kesalahan Saya</h1></div><button id="backGame" class="btn secondary" type="button">Kembali</button></div>
+    <p class="muted">Baca analisis, kenal pasti sebab kesalahan, kemudian jawab semula.</p>
+    <div id="wrongList"></div>
+  </section>
+
+  <section id="finish" class="card hidden" style="max-width:760px;margin:30px auto">
+    <span class="tag">WORLD SELESAI</span><h1 style="margin-top:10px">Laporan Prestasi</h1>
+    <div id="summary"></div>
+    <button id="finishReview" class="btn" type="button">Buat Pembetulan Sekarang</button>
+  </section>
+</div>
+
+<script>
+const questions=[
+{cat:'Subjek & Predikat',q:'Para peserta dari sekolah pedalaman itu kelihatan amat bersemangat sejak awal pagi.',i:'Pilih pembahagian subjek dan predikat yang tepat.',a:['Subjek: Para peserta | Predikat: dari sekolah pedalaman itu kelihatan amat bersemangat sejak awal pagi','Subjek: Para peserta dari sekolah pedalaman itu | Predikat: kelihatan amat bersemangat sejak awal pagi','Subjek: Para peserta dari sekolah | Predikat: pedalaman itu kelihatan amat bersemangat sejak awal pagi','Subjek: Para peserta dari sekolah pedalaman | Predikat: itu kelihatan amat bersemangat sejak awal pagi'],c:1,e:'Frasa “dari sekolah pedalaman itu” menerangkan kata nama “para peserta”, jadi seluruh frasa itu ialah subjek.'},
+{cat:'Pola Ayat',q:'Keputusan pertandingan debat peringkat daerah itu sungguh membanggakan.',i:'Tentukan pola ayat dasar.',a:['FN + FN','FN + FK','FN + FA','FN + FS'],c:2,e:'“Sungguh membanggakan” berfungsi sebagai frasa adjektif yang menerangkan keadaan keputusan.'},
+{cat:'Pola Ayat',q:'Sebahagian besar daripada dokumen sulit itu di dalam kabinet berkunci.',i:'Tentukan pola ayat dasar.',a:['FN + FN','FN + FK','FN + FA','FN + FS'],c:3,e:'Predikat “di dalam kabinet berkunci” bermula dengan kata sendi nama “di”, maka polanya FN + FS.'},
+{cat:'Jenis Ayat',q:'Usah kamu sebarkan khabar yang belum dipastikan kesahihannya.',i:'Nyatakan jenis ayat.',a:['Ayat penyata','Ayat tanya','Ayat perintah','Ayat seruan'],c:2,e:'Kata “usah” membawa maksud larangan, maka ayat ini ialah ayat perintah.'},
+{cat:'Susunan Ayat',q:'Amat sukar untuk ditembusi benteng pertahanan pasukan lawan itu.',i:'Pilih ayat susunan biasa yang tepat.',a:['Benteng pertahanan pasukan lawan itu amat sukar untuk ditembusi.','Pasukan lawan itu benteng pertahanannya amat sukar untuk ditembusi.','Amat sukar benteng pertahanan pasukan lawan itu untuk ditembusi.','Benteng itu pasukan lawan amat sukar untuk ditembusi.'],c:0,e:'Subjek perlu diletakkan di hadapan: “Benteng pertahanan pasukan lawan itu”.'},
+{cat:'Aktif & Pasif',q:'Pihak berkuasa akan memperketat kawalan keselamatan di semua pintu masuk.',i:'Pilih ayat pasif yang gramatis.',a:['Kawalan keselamatan di semua pintu masuk akan diperketat oleh pihak berkuasa.','Di semua pintu masuk akan memperketat kawalan keselamatan oleh pihak berkuasa.','Pihak berkuasa akan diperketat kawalan keselamatan di semua pintu masuk.','Kawalan keselamatan akan pihak berkuasa perketat di semua pintu masuk.'],c:0,e:'Objek “kawalan keselamatan” dipindahkan ke hadapan dan kata kerja berubah kepada “diperketat”.'},
+{cat:'Aktif & Pasif',q:'Laporan terperinci itu telah saya serahkan kepada pengetua semalam.',i:'Pilih ayat aktif yang tepat.',a:['Saya telah menyerahkan laporan terperinci itu kepada pengetua semalam.','Saya telah diserahkan laporan terperinci itu kepada pengetua semalam.','Laporan terperinci itu menyerahkan saya kepada pengetua semalam.','Pengetua telah saya serahkan laporan terperinci itu semalam.'],c:0,e:'Ayat pasif diri pertama menggunakan susunan “objek + saya + kata kerja”. Bentuk aktifnya bermula dengan “Saya”.'},
+{cat:'Analisis Sintaksis',q:'Wah, hebat benar persembahan teater para pelajar itu malam tadi!',i:'Pilih analisis yang paling tepat.',a:['Jenis: Seruan; Pola: FN + FA','Jenis: Penyata; Pola: FN + FK','Jenis: Seruan; Pola: FN + FN','Jenis: Perintah; Pola: FN + FS'],c:0,e:'“Wah” menandakan ayat seruan, manakala “hebat benar” ialah frasa adjektif.'},
+{cat:'Pola Ayat',q:'Lelaki yang sedang berbual dengan pegawai itu abang kepada rakan sekelas saya.',i:'Tentukan pola ayat dasar.',a:['FN + FN','FN + FK','FN + FA','FN + FS'],c:0,e:'Predikat “abang kepada rakan sekelas saya” ialah frasa nama.'},
+{cat:'Analisis Sintaksis',q:'Di hujung lorong sempit itu berdiri sebuah rumah agam yang telah lama ditinggalkan.',i:'Pilih pernyataan yang tepat.',a:['Susunan biasa dan pola FN + FS','Susunan songsang dan pola FN + FK','Susunan songsang dan pola FN + FA','Susunan biasa dan pola FN + FN'],c:1,e:'Predikat “Di hujung lorong sempit itu berdiri” didahulukan sebelum subjek “sebuah rumah agam...”; inti predikat mengandungi kata kerja “berdiri”.'}
+];
+let state={name:'',className:'',room:'',idx:0,score:0,combo:0,correct:0,answered:0,wrong:[],locked:false};
+const demo=[{name:'Siti',score:1280},{name:'Arjun',score:1110},{name:'Mei Ling',score:940},{name:'Hakim',score:720}];
+const $=id=>document.getElementById(id);
+function start(){const name=$('name').value.trim();if(!name)return alert('Masukkan nama murid.');state.name=name;state.className=$('className').value.trim()||'Tingkatan 2';state.room=$('room').value.trim()||'T2-SINTAKSIS';$('login').classList.add('hidden');$('game').classList.remove('hidden');$('welcome').textContent=`Selamat datang, ${state.name}`;render();}
+function render(){state.locked=false;const q=questions[state.idx];$('qNo').textContent=`Soalan ${state.idx+1}/${questions.length}`;$('category').textContent=q.cat;$('question').textContent=q.q;$('instruction').textContent=q.i;$('difficulty').textContent=state.idx<3?'Sederhana Tinggi':'Sukar';$('enemyHp').style.width=`${100-(state.idx/questions.length*100)}%`;$('feedback').classList.add('hidden');$('next').classList.add('hidden');$('answers').innerHTML='';q.a.forEach((text,n)=>{const b=document.createElement('button');b.className='answer';b.type='button';b.textContent=text;b.addEventListener('click',()=>answer(n));$('answers').appendChild(b)});updateStats();updateBoard();}
+function answer(n){if(state.locked)return;state.locked=true;const q=questions[state.idx];state.answered++;const ok=n===q.c;const f=$('feedback');f.classList.remove('hidden');if(ok){state.correct++;state.combo++;const gain=100+(state.combo*20);state.score+=gain;f.innerHTML=`<div class="correct">Tepat! +${gain} mata</div><p>${q.e}</p>`;}else{state.combo=0;state.wrong.push({...q,chosen:n,resolved:false});f.innerHTML=`<div class="incorrect">Belum tepat</div><p><b>Jawapan anda:</b> ${q.a[n]}</p><p><b>Jawapan betul:</b> ${q.a[q.c]}</p><p><b>Analisis:</b> ${q.e}</p>`;}[...$('answers').children].forEach((b,i)=>{b.disabled=true;if(i===q.c)b.style.borderColor='var(--good)';if(i===n&&i!==q.c)b.style.borderColor='var(--bad)'});$('next').classList.remove('hidden');updateStats();updateBoard();}
+function next(){state.idx++;if(state.idx>=questions.length)return finish();render();}
+function updateStats(){$('score').textContent=state.score.toLocaleString();$('combo').textContent=`x${state.combo}`;$('accuracy').textContent=state.answered?`${Math.round(state.correct/state.answered*100)}%`:'0%';}
+function updateBoard(){const list=[...demo,{name:state.name||'Anda',score:state.score}].sort((a,b)=>b.score-a.score);$('rank').textContent=`#${list.findIndex(x=>x.name===state.name)+1}`;$('board').innerHTML=list.map((x,i)=>`<tr class="${x.name===state.name?'rank-self':''}"><td>${i+1}</td><td>${x.name}</td><td>${x.score.toLocaleString()}</td></tr>`).join('');}
+function openReview(){ $('game').classList.add('hidden');$('finish').classList.add('hidden');$('review').classList.remove('hidden');renderReview();}
+function renderReview(){const box=$('wrongList');if(!state.wrong.length){box.innerHTML='<div class="feedback"><b>Tiada kesalahan direkodkan.</b></div>';return;}box.innerHTML='';state.wrong.forEach((w,i)=>{const d=document.createElement('div');d.className='wrong-item';d.innerHTML=`<div class="tag">${w.cat}</div><h3>${w.q}</h3><p><span class="incorrect">Jawapan anda:</span> ${w.a[w.chosen]}</p><p><span class="correct">Jawapan betul:</span> ${w.a[w.c]}</p><p><b>Kenapa?</b> ${w.e}</p><button class="btn ${w.resolved?'good':''}" type="button" data-i="${i}">${w.resolved?'Pembetulan Selesai':'Jawab Semula'}</button>`;box.appendChild(d)});box.querySelectorAll('button[data-i]').forEach(b=>b.addEventListener('click',()=>retry(Number(b.dataset.i))));}
+function retry(i){const w=state.wrong[i];if(w.resolved)return;const response=prompt(`${w.q}\n\nTaip nombor jawapan 1-${w.a.length}:\n${w.a.map((x,n)=>`${n+1}. ${x}`).join('\n')}`);if(Number(response)-1===w.c){w.resolved=true;state.score+=75;alert('Pembetulan tepat. +75 mata');renderReview();}else alert('Masih belum tepat. Baca analisis dan cuba lagi.');}
+function finish(){ $('game').classList.add('hidden');$('finish').classList.remove('hidden');const unresolved=state.wrong.filter(x=>!x.resolved).length;$('summary').innerHTML=`<div class="grid stats" style="margin:18px 0"><div class="stat"><div class="label">Skor</div><div class="value">${state.score}</div></div><div class="stat"><div class="label">Betul</div><div class="value">${state.correct}/${questions.length}</div></div><div class="stat"><div class="label">Ketepatan</div><div class="value">${Math.round(state.correct/questions.length*100)}%</div></div><div class="stat"><div class="label">Belum Dibetulkan</div><div class="value">${unresolved}</div></div></div><div class="feedback"><b>Keutamaan:</b> Selesaikan semua pembetulan untuk mendapatkan mata pemulihan dan rekod penguasaan yang sah.</div>`;}
+$('start').addEventListener('click',start);$('next').addEventListener('click',next);$('openReview').addEventListener('click',openReview);$('finishReview').addEventListener('click',openReview);$('backGame').addEventListener('click',()=>{$('review').classList.add('hidden');(state.idx>=questions.length?$('finish'):$('game')).classList.remove('hidden');});
+</script>
+</body>
+</html>
