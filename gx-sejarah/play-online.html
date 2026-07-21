@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GX Sejarah Online</title>
+<style>
+:root{--gold:#e8bd5d;--panel:#0d2231;--ok:#2bb673;--bad:#e45c5c}*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans SC",sans-serif;background:radial-gradient(circle at top,#2a5368,#0a1b28 42%,#050b11);color:#fff;min-height:100vh}.wrap{max-width:1280px;margin:auto;padding:16px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.brand{color:var(--gold);font-weight:900;letter-spacing:.08em}.status{padding:8px 12px;border:1px solid #ffffff25;border-radius:999px;background:#ffffff0d}.panel{margin-top:16px;background:#0b1d2bdd;border:1px solid #ffffff1d;border-radius:20px;padding:20px}.grid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end}label{font-size:14px;color:#c9d9e1}input{display:block;width:100%;margin-top:7px;padding:13px;border:0;border-radius:12px;font-size:16px}.btn{border:0;border-radius:12px;padding:13px 17px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#f1d27e,#bd8525);color:#251900}.note{color:#b8cbd5;line-height:1.55}.gamebox{margin-top:16px;border-radius:20px;overflow:hidden;border:1px solid #ffffff20;background:#07131d}.gamebox iframe{display:block;width:100%;height:900px;border:0}.hidden{display:none}.ok{color:#71e3a8}.bad{color:#ff9999}@media(max-width:760px){.grid{grid-template-columns:1fr}.gamebox iframe{height:1050px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<div class="top"><div class="brand">GX SEJARAH · ONLINE MODE</div><div id="syncStatus" class="status">Semak sambungan...</div></div>
+<section id="login" class="panel">
+<h2>Masuk Kelas</h2>
+<p class="note">学生输入姓名和老师提供的班级代码。完成 World 1 后，成绩会自动上传教师后台；若尚未连接 Supabase，成绩仍保存在当前设备。</p>
+<div class="grid">
+<label>Nama pelajar<input id="studentName" maxlength="30" placeholder="Contoh: Alison"></label>
+<label>Kod kelas<input id="classCode" maxlength="12" placeholder="Contoh: GX4A01"></label>
+<button id="enterBtn" class="btn" type="button">进入游戏</button>
+</div>
+</section>
+<section id="gameSection" class="gamebox hidden"><iframe id="gameFrame" src="index.html" title="GX Sejarah World 1"></iframe></section>
+</main>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const $=id=>document.getElementById(id);let supabaseClient=null,lastRecordSignature='',studentName='',classCode='',poller=null;
+function configured(){const c=window.GX_SUPABASE||{};return c.url&&c.anonKey&&!c.url.includes('YOUR_')&&!c.anonKey.includes('YOUR_')}
+function setStatus(text,ok=false){$('syncStatus').textContent=text;$('syncStatus').className='status '+(ok?'ok':'bad')}
+async function init(){if(!configured()){setStatus('本地模式 · Supabase 未连接');return}try{supabaseClient=window.supabase.createClient(window.GX_SUPABASE.url,window.GX_SUPABASE.anonKey);const{error}=await supabaseClient.from('student_scores').select('id').limit(1);if(error)throw error;setStatus('在线后台已连接',true)}catch(e){console.error(e);supabaseClient=null;setStatus('连接失败 · 使用本地模式')}}
+function enter(){studentName=$('studentName').value.trim();classCode=$('classCode').value.trim().toUpperCase();if(!studentName||!classCode){alert('请输入学生姓名和班级代码。');return}$('login').classList.add('hidden');$('gameSection').classList.remove('hidden');const frame=$('gameFrame');frame.addEventListener('load',()=>{try{const doc=frame.contentDocument;const nameInput=doc.getElementById('name');if(nameInput)nameInput.value=studentName}catch(e){console.warn(e)}} ,{once:true});poller=setInterval(checkForResult,1500)}
+async function checkForResult(){let records=[];try{records=JSON.parse(localStorage.getItem('gxSejarahRecords')||'[]')}catch(e){return}const r=records[0];if(!r||r.name!==studentName)return;const sig=[r.name,r.score,r.correct,r.wrong,r.hints,r.time].join('|');if(sig===lastRecordSignature)return;lastRecordSignature=sig;const payload={student_name:studentName,class_code:classCode,world:'world1',score:Number(r.score)||0,correct_count:Number(r.correct)||0,wrong_count:Number(r.wrong)||0,hints_used:Number(r.hints)||0,progress_percent:100,completed_at:new Date().toISOString(),wrong_items:[]};localStorage.setItem('gxSejarahPendingUpload',JSON.stringify(payload));if(!supabaseClient){setStatus('成绩已保存在本机 · 等待上线');return}setStatus('正在上传成绩...');const{error}=await supabaseClient.from('student_scores').insert(payload);if(error){console.error(error);setStatus('上传失败 · 已保存在本机')}else{localStorage.removeItem('gxSejarahPendingUpload');setStatus('成绩已上传教师后台',true);clearInterval(poller)}}
+$('enterBtn').addEventListener('click',enter);['studentName','classCode'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')enter()}));init();
+</script>
+</body>
+</html>
