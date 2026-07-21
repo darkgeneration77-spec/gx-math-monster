@@ -19,7 +19,7 @@
 <body>
 <iframe id="game" src="v3.html" title="Sintaksis Hunter T2 Stable"></iframe>
 <script>
-const DATA=[
+window.PHASE2_DATA=[
  window.PHASE2_WORLD1,window.PHASE2_WORLD2,window.PHASE2_WORLD3,window.PHASE2_WORLD4,window.PHASE2_WORLD5,
  window.PHASE2_WORLD6,window.PHASE2_WORLD7,window.PHASE2_WORLD8,window.PHASE2_WORLD9,window.PHASE2_WORLD10
 ];
@@ -30,7 +30,7 @@ frame.addEventListener('load',()=>{
  const clone=q=>({...q,a:[...q.a],keywords:[...(q.keywords||[])]});
  const originalBuild=w.buildQuestions;
  w.buildQuestions=function(world){
-  const bank=DATA[world];
+  const bank=window.PHASE2_DATA[world];
   return Array.isArray(bank)&&bank.length===15?bank.map(clone):originalBuild(world);
  };
  const css=d.createElement('style');
@@ -45,7 +45,7 @@ frame.addEventListener('load',()=>{
  d.head.appendChild(css);
  const modal=d.createElement('div');
  modal.id='stableCoach';modal.className='coach-modal hidden';
- modal.innerHTML=`<div class="coach-box"><div style="font-size:48px;text-align:center">🧙‍♂️</div><span class="tag">GRAMMAR MASTER</span><h2 id="stableCoachTitle">Cari jawapan langkah demi langkah</h2><div id="stableCoachBody"></div></div>`;
+ modal.innerHTML=`<div class="coach-box"><div style="font-size:48px;text-align:center">🧙‍♂️</div><span class="tag">GRAMMAR MASTER</span><h2>Cari jawapan langkah demi langkah</h2><div id="stableCoachBody"></div></div>`;
  d.body.appendChild(modal);
  const $=id=>d.getElementById(id);
  function guide(q){
@@ -61,33 +61,42 @@ frame.addEventListener('load',()=>{
   const g=guide(q);
   $('stableCoach').classList.remove('hidden');
   $('stableCoachBody').innerHTML=`<p><b>${q.id||''}</b> ${q.q}</p><h3>${g.ask}</h3><p class="cn-note">${g.cn}</p><div class="coach-options">${g.opts.map((x,i)=>`<button data-guide="${i}">${x}</button>`).join('')}</div><div id="guideMsg"></div>`;
-  d.querySelectorAll('[data-guide]').forEach(b=>b.addEventListener('click',()=>{
+  d.querySelectorAll('[data-guide]').forEach(b=>b.onclick=()=>{
    if(+b.dataset.guide!==g.c){$('guideMsg').innerHTML='<p style="color:#ff6272">Belum tepat. 再想一想。</p>';return;}
    $('stableCoachBody').innerHTML=`<p style="color:#29c875"><b>Betul! 方向正确。</b></p><p><b>Jawapan anda:</b> ${q.a[chosen]}</p><p><b>Jawapan betul:</b> ${q.a[q.c]}</p><div class="formula-note"><b>Formula:</b> ${q.formula||''}<br><span class="cn-note"><b>口诀：</b> ${q.mnemonic||''}</span></div><p><b>Penjelasan BM:</b> ${q.e||''}</p><p class="cn-note"><b>华语讲解：</b> ${q.cn||''}</p>${q.trap?`<div class="trap-note"><b>常见陷阱：</b> ${q.trap}</div>`:''}<button id="coachDoneStable" class="btn good">Saya faham / 我明白了</button>`;
-   $('coachDoneStable').addEventListener('click',()=>{$('stableCoach').classList.add('hidden');done();});
-  }));
+   $('coachDoneStable').onclick=()=>{$('stableCoach').classList.add('hidden');done();};
+  };
  }
- const originalAnswer=w.answer;
- w.answer=function(n){
+ const nativeAnswer=w.answer;
+ function handleAnswer(n){
   if(!w.run||w.run.locked)return;
-  const q=w.run.qs[w.run.idx];
-  const wrong=n!==q.c;
-  originalAnswer(n);
+  const q=w.run.qs[w.run.idx],wrong=n!==q.c;
+  nativeAnswer(n);
   const feedback=$('feedback');
-  if(feedback&&q){
-   feedback.innerHTML+=`<div class="bilingual"><div class="formula-note"><b>Formula:</b> ${q.formula||''}<br><span class="cn-note"><b>口诀：</b> ${q.mnemonic||''}</span></div><p class="cn-note"><b>华语讲解：</b> ${q.cn||''}</p>${q.trap?`<div class="trap-note"><b>常见陷阱：</b> ${q.trap}</div>`:''}</div>`;
-  }
+  if(feedback&&q)feedback.innerHTML+=`<div class="bilingual"><div class="formula-note"><b>Formula:</b> ${q.formula||''}<br><span class="cn-note"><b>口诀：</b> ${q.mnemonic||''}</span></div><p class="cn-note"><b>华语讲解：</b> ${q.cn||''}</p>${q.trap?`<div class="trap-note"><b>常见陷阱：</b> ${q.trap}</div>`:''}</div>`;
   if(wrong){
    const next=$('next');
    next.disabled=true;next.textContent='Selesaikan Grammar Master dahulu';
    setTimeout(()=>openCoach(q,n,()=>{w.state.total+=10;w.state.coins+=5;w.save();next.disabled=false;next.textContent='Seterusnya';}),180);
   }
- };
+ }
+ w.answer=handleAnswer;
+ const answers=$('answers');
+ if(answers){
+  answers.addEventListener('click',event=>{
+   const button=event.target.closest('.answer');
+   if(!button||!answers.contains(button))return;
+   event.preventDefault();
+   event.stopImmediatePropagation();
+   const index=[...answers.children].indexOf(button);
+   if(index>=0)handleAnswer(index);
+  },true);
+ }
  const originalRenderQ=w.renderQ;
  w.renderQ=function(){
   originalRenderQ();
   const q=w.run&&w.run.qs[w.run.idx];
-  if(q&&q.id){$('cat').textContent=`${q.id} • ${q.skill||q.cat} • ${q.difficulty||'Sukar'}`;}
+  if(q&&q.id)$('cat').textContent=`${q.id} • ${q.skill||q.cat} • ${q.difficulty||'Sukar'}`;
  };
  const originalReview=w.review;
  w.review=function(){
@@ -99,7 +108,6 @@ frame.addEventListener('load',()=>{
    btn.onclick=()=>openCoach(item,item.chosen,()=>w.retry(i));
   });
  };
- // Re-render avatar buttons explicitly so the character selection page is always present.
  if(typeof w.renderAv==='function')w.renderAv();
 });
 </script>
