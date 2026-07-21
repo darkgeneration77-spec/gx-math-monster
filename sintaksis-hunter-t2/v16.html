@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sintaksis Hunter T2 V16 Stable</title>
+<style>html,body{margin:0;width:100%;height:100%;background:#07111f}iframe{border:0;width:100%;height:100%;display:block}</style>
+<script src="phase2-world1.js"></script>
+<script src="phase2-world2.js"></script>
+<script src="phase2-world3.js"></script>
+<script src="phase2-world4.js"></script>
+<script src="phase2-world5.js"></script>
+<script src="phase2-world6.js"></script>
+<script src="phase2-world7.js"></script>
+<script src="phase2-world8.js"></script>
+<script src="phase2-world9.js"></script>
+<script src="phase2-world10.js"></script>
+</head>
+<body>
+<iframe id="game" src="v3.html" title="Sintaksis Hunter T2 Stable"></iframe>
+<script>
+const DATA=[
+ window.PHASE2_WORLD1,window.PHASE2_WORLD2,window.PHASE2_WORLD3,window.PHASE2_WORLD4,window.PHASE2_WORLD5,
+ window.PHASE2_WORLD6,window.PHASE2_WORLD7,window.PHASE2_WORLD8,window.PHASE2_WORLD9,window.PHASE2_WORLD10
+];
+const frame=document.getElementById('game');
+frame.addEventListener('load',()=>{
+ const w=frame.contentWindow,d=frame.contentDocument;
+ if(!w||!d)return;
+ const clone=q=>({...q,a:[...q.a],keywords:[...(q.keywords||[])]});
+ const originalBuild=w.buildQuestions;
+ w.buildQuestions=function(world){
+  const bank=DATA[world];
+  return Array.isArray(bank)&&bank.length===15?bank.map(clone):originalBuild(world);
+ };
+ const css=d.createElement('style');
+ css.textContent=`
+ .bilingual{margin-top:12px;padding:13px;border:1px solid #36577e;border-radius:13px;background:#0a1728}
+ .cn-note{color:#65c7ff}.trap-note{border-left:4px solid #ff6272;padding:9px 11px;background:#25151d;border-radius:9px;margin-top:9px}
+ .formula-note{border-left:4px solid #ffc94a;padding:9px 11px;background:#111d30;border-radius:9px;margin-top:9px}
+ .coach-modal{position:fixed;inset:0;background:rgba(2,8,18,.86);display:grid;place-items:center;padding:16px;z-index:99999}
+ .coach-box{width:min(680px,100%);max-height:90vh;overflow:auto;background:#101d31;border:1px solid #36577e;border-radius:20px;padding:19px;color:#f4f7fb}
+ .coach-options{display:grid;gap:9px;margin-top:12px}.coach-options button{padding:12px;border:1px solid #36577e;border-radius:12px;background:#142541;color:white;text-align:left;cursor:pointer}
+ `;
+ d.head.appendChild(css);
+ const modal=d.createElement('div');
+ modal.id='stableCoach';modal.className='coach-modal hidden';
+ modal.innerHTML=`<div class="coach-box"><div style="font-size:48px;text-align:center">🧙‍♂️</div><span class="tag">GRAMMAR MASTER</span><h2 id="stableCoachTitle">Cari jawapan langkah demi langkah</h2><div id="stableCoachBody"></div></div>`;
+ d.body.appendChild(modal);
+ const $=id=>d.getElementById(id);
+ function guide(q){
+  const cat=q.cat||'';
+  if(cat.includes('Subjek'))return{ask:'Apakah yang perlu dicari dahulu?',cn:'第一步先找什么？',opts:['Siapa atau apa yang dibincangkan','Tanda baca','Kata terakhir'],c:0};
+  if(cat.includes('Pola'))return{ask:'Apakah yang menentukan pola ayat?',cn:'什么决定基本句型？',opts:['Inti predikat','Panjang ayat','Subjek sahaja'],c:0};
+  if(cat.includes('Jenis'))return{ask:'Apakah asas menentukan jenis ayat?',cn:'判断句子种类看什么？',opts:['Tujuan ayat','Bilangan perkataan','Nama watak'],c:0};
+  if(cat.includes('Susunan'))return{ask:'Apakah formula susunan biasa?',cn:'正常语序公式是什么？',opts:['S + P','P + S','Objek + P'],c:0};
+  if(cat.includes('Aktif')||cat.includes('Pasif'))return{ask:'Dalam ayat aktif, siapa di hadapan?',cn:'主动句中谁在前面？',opts:['Pelaku','Objek','Tempat'],c:0};
+  return{ask:'Apakah langkah pertama analisis sintaksis?',cn:'综合分析第一步是什么？',opts:['Pisahkan subjek dan predikat','Terus pilih jawapan','Cari satu kata sahaja'],c:0};
+ }
+ function openCoach(q,chosen,done){
+  const g=guide(q);
+  $('stableCoach').classList.remove('hidden');
+  $('stableCoachBody').innerHTML=`<p><b>${q.id||''}</b> ${q.q}</p><h3>${g.ask}</h3><p class="cn-note">${g.cn}</p><div class="coach-options">${g.opts.map((x,i)=>`<button data-guide="${i}">${x}</button>`).join('')}</div><div id="guideMsg"></div>`;
+  d.querySelectorAll('[data-guide]').forEach(b=>b.addEventListener('click',()=>{
+   if(+b.dataset.guide!==g.c){$('guideMsg').innerHTML='<p style="color:#ff6272">Belum tepat. 再想一想。</p>';return;}
+   $('stableCoachBody').innerHTML=`<p style="color:#29c875"><b>Betul! 方向正确。</b></p><p><b>Jawapan anda:</b> ${q.a[chosen]}</p><p><b>Jawapan betul:</b> ${q.a[q.c]}</p><div class="formula-note"><b>Formula:</b> ${q.formula||''}<br><span class="cn-note"><b>口诀：</b> ${q.mnemonic||''}</span></div><p><b>Penjelasan BM:</b> ${q.e||''}</p><p class="cn-note"><b>华语讲解：</b> ${q.cn||''}</p>${q.trap?`<div class="trap-note"><b>常见陷阱：</b> ${q.trap}</div>`:''}<button id="coachDoneStable" class="btn good">Saya faham / 我明白了</button>`;
+   $('coachDoneStable').addEventListener('click',()=>{$('stableCoach').classList.add('hidden');done();});
+  }));
+ }
+ const originalAnswer=w.answer;
+ w.answer=function(n){
+  if(!w.run||w.run.locked)return;
+  const q=w.run.qs[w.run.idx];
+  const wrong=n!==q.c;
+  originalAnswer(n);
+  const feedback=$('feedback');
+  if(feedback&&q){
+   feedback.innerHTML+=`<div class="bilingual"><div class="formula-note"><b>Formula:</b> ${q.formula||''}<br><span class="cn-note"><b>口诀：</b> ${q.mnemonic||''}</span></div><p class="cn-note"><b>华语讲解：</b> ${q.cn||''}</p>${q.trap?`<div class="trap-note"><b>常见陷阱：</b> ${q.trap}</div>`:''}</div>`;
+  }
+  if(wrong){
+   const next=$('next');
+   next.disabled=true;next.textContent='Selesaikan Grammar Master dahulu';
+   setTimeout(()=>openCoach(q,n,()=>{w.state.total+=10;w.state.coins+=5;w.save();next.disabled=false;next.textContent='Seterusnya';}),180);
+  }
+ };
+ const originalRenderQ=w.renderQ;
+ w.renderQ=function(){
+  originalRenderQ();
+  const q=w.run&&w.run.qs[w.run.idx];
+  if(q&&q.id){$('cat').textContent=`${q.id} • ${q.skill||q.cat} • ${q.difficulty||'Sukar'}`;}
+ };
+ const originalReview=w.review;
+ w.review=function(){
+  originalReview();
+  d.querySelectorAll('[data-r]').forEach(btn=>{
+   const i=+btn.dataset.r,item=w.state.wrong[i];
+   if(!item||item.resolved)return;
+   btn.textContent='Grammar Master + Jawab Semula';
+   btn.onclick=()=>openCoach(item,item.chosen,()=>w.retry(i));
+  });
+ };
+ // Re-render avatar buttons explicitly so the character selection page is always present.
+ if(typeof w.renderAv==='function')w.renderAv();
+});
+</script>
+</body>
+</html>
