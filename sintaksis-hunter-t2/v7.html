@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sintaksis Hunter T2 Phase 2 World 2</title>
+<style>html,body{margin:0;width:100%;height:100%;background:#07111f}iframe{border:0;width:100%;height:100%;display:block}</style>
+<script src="phase2-world2.js"></script>
+</head>
+<body>
+<iframe id="phase2" src="v6.html" title="Sintaksis Hunter Phase 2 World 1 dan 2"></iframe>
+<script>
+const outer=document.getElementById('phase2');
+function installWorld2(){
+ try{
+  const outerWindow=outer.contentWindow;
+  const inner=outer.contentDocument.getElementById('game');
+  if(!inner||!inner.contentWindow||!inner.contentWindow.buildQuestions)return false;
+  const game=inner.contentWindow;
+  if(game.__phase2World2Installed)return true;
+  const previousBuild=game.buildQuestions;
+  game.buildQuestions=function(world){
+   if(world===1)return window.PHASE2_WORLD2.map(q=>({...q,a:[...q.a],keywords:[...(q.keywords||[])]}));
+   return previousBuild(world);
+  };
+  game.__phase2World2Installed=true;
+  return true;
+ }catch(e){return false}
+}
+outer.addEventListener('load',()=>{
+ const inner=outer.contentDocument.getElementById('game');
+ if(inner)inner.addEventListener('load',()=>setTimeout(installWorld2,100));
+ let tries=0;const timer=setInterval(()=>{tries++;if(installWorld2()||tries>40)clearInterval(timer)},150);
+});
+</script>
+</body>
+</html>
