@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sintaksis Hunter T2 Phase 2</title>
+<style>html,body{margin:0;width:100%;height:100%;background:#07111f}iframe{border:0;width:100%;height:100%;display:block}</style>
+<script src="phase2-world1.js"></script>
+</head>
+<body>
+<iframe id="game" src="v4.html" title="Sintaksis Hunter T2 Phase 2"></iframe>
+<script>
+const frame=document.getElementById('game');
+frame.addEventListener('load',()=>{
+ const w=frame.contentWindow,d=frame.contentDocument;
+ const originalBuild=w.buildQuestions;
+ w.buildQuestions=function(world){
+  if(world===0)return window.PHASE2_WORLD1.map(q=>({...q,a:[...q.a],keywords:[...(q.keywords||[])]}));
+  return originalBuild(world);
+ };
+ const css=d.createElement('style');
+ css.textContent=`
+ .coach-modal{position:fixed;inset:0;background:rgba(2,8,18,.86);display:grid;place-items:center;padding:18px;z-index:9999}
+ .coach-box{width:min(720px,100%);max-height:90vh;overflow:auto;background:#101d31;border:1px solid #36577e;border-radius:22px;padding:20px;color:#f4f7fb}
+ .coach-avatar{font-size:54px;text-align:center}.coach-step{padding:13px;border:1px solid #29425f;border-radius:14px;background:#0a1728;margin:10px 0}
+ .coach-options{display:grid;gap:9px;margin-top:12px}.coach-options button{padding:12px;border:1px solid #36577e;border-radius:12px;background:#142541;color:white;text-align:left;cursor:pointer}
+ .coach-cn{color:#65c7ff}.coach-ok{color:#29c875;font-weight:700}.coach-bad{color:#ff6272;font-weight:700}
+ .meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.meta{padding:9px;border-radius:10px;background:#0a1728;border:1px solid #29425f;font-size:.88rem}
+ .trap{border-left:4px solid #ff6272;padding:10px 12px;background:#25151d;border-radius:10px;margin:10px 0}.formula2{border-left:4px solid #ffc94a;padding:10px 12px;background:#111d30;border-radius:10px;margin:10px 0}
+ @media(max-width:600px){.meta-grid{grid-template-columns:1fr}}
+ `;
+ d.head.appendChild(css);
+ const modal=d.createElement('div');modal.id='coachModal';modal.className='coach-modal hidden';
+ modal.innerHTML=`<div class="coach-box"><div class="coach-avatar">🧙‍♂️</div><div class="tag">GRAMMAR MASTER • PHASE 2</div><h2 id="coachTitle">Mari cari jawapan bersama</h2><p id="coachIntro" class="muted"></p><div id="coachBody"></div><div class="nav" style="margin-top:14px"><button id="coachClose" class="btn secondary">Tutup</button></div></div>`;
+ d.body.appendChild(modal);
+ const $=id=>d.getElementById(id);
+ function guideFor(q){return w.GUIDES[q.cat]||w.GUIDES['Analisis Sintaksis']}
+ function coachQuestions(q){
+  if(q.cat==='Subjek dan Predikat')return[
+   {bm:'Apakah perkara pertama yang perlu dicari?',cn:'第一步应该先找什么？',opts:['Siapa atau apa yang dibincangkan','Kata terakhir dalam ayat','Tanda baca sahaja'],c:0},
+   {bm:'Jika frasa selepas kata nama masih menerangkan “yang mana”, frasa itu...',cn:'如果后面的词仍在说明“哪一个／哪些”，它属于哪里？',opts:['Masih sebahagian daripada subjek','Mesti predikat','Boleh dibuang'],c:0},
+   {bm:'Selepas subjek lengkap dikenal pasti, baki ayat ialah...',cn:'完整主语找出后，剩下的部分是什么？',opts:['Predikat','Subjek kedua','Penjodoh bilangan'],c:0}
+  ];
+  if(q.cat==='Pola Ayat')return[
+   {bm:'Bahagian manakah menentukan pola ayat?',cn:'哪一部分决定基本句型？',opts:['Inti predikat','Kata pertama sahaja','Panjang ayat'],c:0},
+   {bm:'Nama→FN, kerja→FK, sifat→FA, kata sendi→...',cn:'名词→FN，动作→FK，性质→FA，介词→什么？',opts:['FS','FN','FA'],c:0}
+  ];
+  if(q.cat==='Jenis Ayat')return[
+   {bm:'Untuk menentukan jenis ayat, kita lihat...',cn:'判断句子种类要看什么？',opts:['Tujuan ayat','Bilangan perkataan','Subjek sahaja'],c:0},
+   {bm:'Kata jangan, usah atau tolong biasanya menunjukkan...',cn:'jangan、usah、tolong 通常表示什么？',opts:['Ayat perintah','Ayat seruan','Ayat penyata'],c:0}
+  ];
+  if(q.cat==='Susunan Ayat')return[
+   {bm:'Susunan biasa menggunakan formula...',cn:'正常语序公式是什么？',opts:['S + P','P + S','Objek + Subjek'],c:0},
+   {bm:'Jika predikat berada di hadapan, ayat itu...',cn:'谓语放在前面是什么语序？',opts:['Songsang','Biasa','Pasif sahaja'],c:0}
+  ];
+  if(q.cat==='Ayat Aktif dan Pasif')return[
+   {bm:'Dalam ayat aktif, siapakah berada di hadapan?',cn:'主动句中谁在前面？',opts:['Pelaku','Objek','Tempat'],c:0},
+   {bm:'Dalam ayat pasif, apakah dipindahkan ke hadapan?',cn:'被动句中什么移到前面？',opts:['Objek','Pelaku','Kata adjektif'],c:0}
+  ];
+  return[
+   {bm:'Langkah pertama analisis sintaksis ialah...',cn:'综合分析第一步是什么？',opts:['Pisahkan subjek dan predikat','Terus pilih jawapan','Cari tanda seru sahaja'],c:0},
+   {bm:'Selepas itu, semak inti predikat dan...',cn:'接着检查谓语核心和什么？',opts:['Tujuan serta susunan ayat','Bilangan huruf','Nama watak sahaja'],c:0}
+  ];
+ }
+ function finalExplanation(q,chosen,earned,onDone){
+  const g=guideFor(q),id=q.id||'SOALAN',skill=q.skill||q.cat,diff=q.difficulty||'Sukar';
+  $('coachBody').innerHTML=`<div class="coach-step">
+   <div class="coach-ok">Panduan selesai! +${earned} Recovery Points</div>
+   <div class="meta-grid"><div class="meta"><b>ID</b><br>${id}</div><div class="meta"><b>Kemahiran</b><br>${skill}</div><div class="meta"><b>Kesukaran</b><br>${diff}</div></div>
+   <p><b>Jawapan anda:</b> ${q.a[chosen]}</p><p><b>Jawapan betul:</b> ${q.a[q.c]}</p>
+   <div class="formula2"><b>Formula:</b> ${q.formula||g.bm}<br><span class="coach-cn"><b>口诀：</b> ${q.mnemonic||g.cn}</span></div>
+   <p><b>Penjelasan BM:</b> ${q.e}</p><p class="coach-cn"><b>华语讲解：</b> ${q.cn||g.cnsteps.join(' ')}</p>
+   ${q.trap?`<div class="trap"><b>Perangkap biasa / 常见陷阱：</b><br>${q.trap}</div>`:''}
+   ${(q.keywords||[]).length?`<p><b>Kata kunci:</b> ${(q.keywords||[]).map(x=>`<span class="tag">${x}</span>`).join(' ')}</p>`:''}
+   <button id="coachDone" class="btn good">Saya faham / 我明白了</button></div>`;
+  $('coachDone').onclick=()=>{$('coachModal').classList.add('hidden');onDone(earned)};
+ }
+ function openCoach(q,chosen,onDone){
+  const steps=coachQuestions(q);let si=0,earned=0;
+  $('coachModal').classList.remove('hidden');$('coachTitle').textContent='Grammar Master: Jangan terus hafal jawapan';
+  $('coachIntro').innerHTML=`<b>${q.id?`[${q.id}] `:''}Soalan:</b> ${q.q}<br><span class="coach-cn">先跟着步骤判断，不要直接背答案。</span>`;
+  function renderStep(){
+   const s=steps[si];if(!s)return finalExplanation(q,chosen,earned,onDone);
+   $('coachBody').innerHTML=`<div class="coach-step"><div class="tag">LANGKAH ${si+1}/${steps.length}</div><h3>${s.bm}</h3><p class="coach-cn">${s.cn}</p><div class="coach-options">${s.opts.map((x,i)=>`<button data-o="${i}">${x}</button>`).join('')}</div><div id="coachMsg"></div></div>`;
+   d.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const ok=+b.dataset.o===s.c;$('coachMsg').innerHTML=ok?'<p class="coach-ok">Betul! 你找对方向了。</p>':'<p class="coach-bad">Belum tepat. 再看口诀，判断这一小步要找什么。</p>';if(ok){earned+=10;setTimeout(()=>{si++;renderStep()},450)}})
+  }
+  renderStep();
+ }
+ $('coachClose').onclick=()=>$('coachModal').classList.add('hidden');
+ const originalAnswer=w.answer;
+ w.answer=function(n){
+  if(w.run.locked)return;const q=w.run.qs[w.run.idx],wrong=n!==q.c;originalAnswer(n);
+  if(wrong){const nextBtn=d.getElementById('next');nextBtn.disabled=true;nextBtn.textContent='Selesaikan Grammar Master dahulu';setTimeout(()=>openCoach(q,n,(earned)=>{w.state.total+=earned;w.state.coins+=Math.floor(earned/2);w.save();nextBtn.disabled=false;nextBtn.textContent='Seterusnya'}),250)}
+ };
+ const originalRenderQ=w.renderQ;
+ w.renderQ=function(){originalRenderQ();const q=w.run.qs[w.run.idx];if(q.id){d.getElementById('cat').textContent=`${q.id} • ${q.skill} • ${q.difficulty}`;const side=d.getElementById('sideGuide');if(side)side.innerHTML=`<div class="formula"><b>${q.formula}</b><br><span class="cn">${q.mnemonic}</span></div><p><b>关键词：</b> ${(q.keywords||[]).join(' • ')}</p>`}}
+ const originalReview=w.review;
+ w.review=function(){originalReview();d.querySelectorAll('[data-r]').forEach(b=>{const i=+b.dataset.r;b.textContent=w.state.wrong[i].resolved?'Selesai':'Grammar Master + Jawab Semula';b.onclick=()=>{const item=w.state.wrong[i];openCoach(item,item.chosen,()=>w.retry(i))}})};
+});
+</script>
+</body>
+</html>
