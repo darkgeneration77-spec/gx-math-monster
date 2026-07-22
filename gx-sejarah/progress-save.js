@@ -36,6 +36,7 @@
     const oldStart=start.onclick;start.onclick=()=>{clear();if(oldStart)oldStart();setTimeout(save,0)};
     if(restart){const oldRestart=restart.onclick;restart.onclick=()=>{clear();if(oldRestart)oldRestart();else location.reload()}}
     ['click','change'].forEach(evt=>document.addEventListener(evt,e=>{if(e.target&&['checkBtn','nextBtn','hintBtn','backMap','retryWrong'].includes(e.target.id))setTimeout(save,50)}));
+    const guard=document.createElement('script');guard.src='score-integrity.js?v=1.0';document.body.appendChild(guard);
     window.addEventListener('beforeunload',save);setInterval(save,5000);
   });
   window.GX_PROGRESS={save,clear,restore,availableFor};
