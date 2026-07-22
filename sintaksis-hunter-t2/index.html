@@ -3,11 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sintaksis Hunter T2</title>
-<meta http-equiv="refresh" content="0; url=v16.html">
-<script>location.replace('v16.html');</script>
+<title>Sistem Bahasa Hunter Tingkatan 2</title>
+<style>
+:root{--bg:#07111f;--panel:#101d31;--line:#29425f;--text:#f4f7fb;--muted:#9fb0c7;--accent:#7c5cff;--good:#29c875;--gold:#ffc94a}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#183154,#07111f 58%);color:var(--text);min-height:100vh}.wrap{max-width:1180px;margin:auto;padding:18px}.card{background:rgba(16,29,49,.97);border:1px solid var(--line);border-radius:20px;padding:18px}.hero{text-align:center;padding:28px}.tag{display:inline-block;padding:5px 10px;border-radius:99px;background:#1c304b;color:#d6e2f1;font-size:.8rem}.muted{color:var(--muted)}.choices{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}.module{border:1px solid var(--line);border-radius:20px;padding:22px;background:#0a1728;cursor:pointer;color:white;text-align:left;transition:.2s}.module:hover{transform:translateY(-4px);border-color:var(--good);box-shadow:0 12px 28px rgba(0,0,0,.3)}.module h2{margin:10px 0}.module strong{font-size:1.1rem}.btn{border:0;border-radius:13px;padding:12px 16px;background:var(--accent);color:white;font-weight:800;cursor:pointer}.secondary{background:#1d314c}.viewer{display:none;margin-top:14px}.viewer.active{display:block}.viewerTop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.frameWrap{height:calc(100vh - 115px);min-height:650px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#07111f}.frameWrap iframe{width:100%;height:100%;border:0;display:block}.note{margin-top:14px;padding:12px;border-left:4px solid var(--gold);background:#111d30;border-radius:10px}@media(max-width:760px){.choices{grid-template-columns:1fr}.hero{padding:20px 14px}.frameWrap{height:calc(100vh - 105px);min-height:580px}.viewerTop{align-items:flex-start;flex-direction:column}}
+</style>
 </head>
-<body>
-<p>Membuka Sintaksis Hunter V16 Stable… <a href="v16.html">Klik di sini</a>.</p>
-</body>
-</html>
+<body><div class="wrap">
+<section id="portal">
+<div class="card hero"><span class="tag">KSSM TINGKATAN 2</span><h1>Sistem Bahasa Hunter</h1><p class="muted">Satu laman web untuk Sintaksis dan Morfologi. Tiada lock — murid bebas memilih latihan.</p></div>
+<div class="choices">
+<button class="module" onclick="openModule('v16.html','Sintaksis Hunter')"><span class="tag">MODUL A</span><h2>⚔️ Sintaksis Hunter</h2><strong>10 World • 150 soalan</strong><p class="muted">Subjek dan predikat, pola ayat, jenis ayat, susunan biasa dan songsang, ayat aktif-pasif, transformasi dan analisis.</p></button>
+<button class="module" onclick="openModule('morfologi-hub.html','Morfologi Hunter')"><span class="tag">MODUL B</span><h2>🧩 Morfologi Hunter</h2><strong>10 World • 150 soalan</strong><p class="muted">Kata ganti nama, akronim, kata adjektif, kata kerja transitif, kata ganda, kata terbitan, kata majmuk, kata bantu dan kata tugas.</p></button>
+</div>
+<div class="note"><b>自由选择：</b> 学生可以直接选择 Sintaksis 或 Morfologi，不需要先完成另一部分。</div>
+</section>
+<section id="viewer" class="viewer">
+<div class="viewerTop"><div><span class="tag">SISTEM BAHASA HUNTER</span><h2 id="moduleTitle" style="margin:6px 0"></h2></div><button class="btn secondary" onclick="backPortal()">← Pilih Modul / 选择模块</button></div>
+<div class="frameWrap"><iframe id="moduleFrame" title="Sistem Bahasa Hunter"></iframe></div>
+</section>
+</div>
+<script>
+const portal=document.getElementById('portal'),viewer=document.getElementById('viewer'),frame=document.getElementById('moduleFrame'),title=document.getElementById('moduleTitle');
+function openModule(src,name){portal.style.display='none';viewer.classList.add('active');title.textContent=name;frame.src=src;history.replaceState(null,'','#'+(src.includes('morfologi')?'morfologi':'sintaksis'));window.scrollTo(0,0)}
+function backPortal(){frame.src='about:blank';viewer.classList.remove('active');portal.style.display='block';history.replaceState(null,'',location.pathname);window.scrollTo(0,0)}
+if(location.hash==='#morfologi')openModule('morfologi-hub.html','Morfologi Hunter');else if(location.hash==='#sintaksis')openModule('v16.html','Sintaksis Hunter');
+</script></body></html>
