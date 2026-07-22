@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "sejarah-form4",
+  "name": "sintaksis-hunter-t2",
   "compatibility_date": "2026-07-22",
   "assets": {
     "directory": "./gx-sejarah",
